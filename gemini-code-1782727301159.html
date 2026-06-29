@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra 30 Câu Từ Vựng - Ms Lê Hằng English</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ĐỊNH DẠNG GIAO DIỆN & HIỆU ỨNG NỀN ĐỘNG (GAMIFICATION) --- */
+        :root {
+            --primary-color: #8854C0;
+            --secondary-color: #FDCB6E;
+            --accent-color: #00C9A7;
+            --correct-color: #00D26A;
+            --wrong-color: #FF4757;
+            --card-bg: #FFFFFF;
+            --text-color: #2D3436;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(-45deg, #8854C0, #FDCB6E, #00C9A7, #FF7675);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Lớp phủ họa tiết SVG lơ lửng động */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M10 15 L15 10 L20 15 L15 20 Z M40 50 A 5 5 0 1 0 40 40 A 5 5 0 1 0 40 50 M60 20 Q 65 10, 70 20 T 80 20'/%3E%3C/g%3E%3C/svg%3E");
+            z-index: 0;
+            pointer-events: none;
+            animation: floatingPattern 30s linear infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes floatingPattern {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 500px; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            z-index: 1;
+        }
+
+        /* --- TIÊU ĐỀ & KHUNG THÔNG BÁO --- */
+        .header-teacher {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #FFFFFF;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 8px;
+        }
+
+        .notice-box {
+            background: #FFEDD5;
+            border: 3px solid #F97316;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 6px 0 #EA580C;
+            text-align: center;
+            color: #7C2D12;
+        }
+
+        .notice-title {
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: #EA580C;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .notice-sub {
+            font-weight: 700;
+            font-style: italic;
+            margin-top: 5px;
+            color: #C2410C;
+            display: block;
+        }
+
+        /* --- CẤU TRÚC CARD CÂU HỎI --- */
+        .section-title {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin: 25px 0 15px 0;
+            box-shadow: 0 4px 0 #6C3FB8;
+            font-weight: 900;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .question-card {
+            background: var(--card-bg);
+            border: 4px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 0 #CBD5E1;
+            position: relative;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        /* --- HỆ THỐNG NÚT VÀ ĐÁP ÁN (3D GAMIFICATION) --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background: #FFFFFF;
+            border: 3px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 14px 20px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #E2E8F0;
+            position: relative;
+            transform: translateY(0);
+        }
+
+        .option-btn:hover:not(.disabled) {
+            transform: scale(1.01) translateY(-2px);
+            box-shadow: 0 8px 0 #CBD5E1;
+            border-color: var(--primary-color);
+        }
+
+        .option-btn:active:not(.disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #CBD5E1;
+        }
+
+        .option-btn.correct {
+            background-color: #E6FBF1 !important;
+            border-color: var(--correct-color) !important;
+            box-shadow: 0 6px 0 var(--correct-color) !important;
+            color: #008744 !important;
+        }
+
+        .option-btn.wrong {
+            background-color: #FFEAEB !important;
+            border-color: var(--wrong-color) !important;
+            box-shadow: 0 6px 0 var(--wrong-color) !important;
+            color: #C51F24 !important;
+            animation: shake 0.4s ease;
+        }
+
+        .option-btn.disabled {
+            pointer-events: none;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* --- KHUNG GIẢI THÍCH SIÊU CHI TIẾT --- */
+        .explanation-box {
+            background: #F8FAFC;
+            border-left: 6px solid var(--primary-color);
+            border-radius: 0 12px 12px 0;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exp-title {
+            font-weight: 900;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+
+        .exp-section {
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .exp-highlight {
+            font-weight: 700;
+            color: #0F172A;
+        }
+
+        /* --- NÚT NỘP BÀI TỔNG KẾT --- */
+        .submit-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .btn-submit-main {
+            background: #FF7675;
+            color: #FFFFFF;
+            font-size: 1.3rem;
+            font-weight: 900;
+            padding: 16px 45px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #D63031;
+        }
+
+        .btn-submit-main:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 11px 0 #D63031;
+        }
+
+        /* --- POPUP KẾT QUẢ CUỐI CÙNG --- */
+        .modal-result {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            display: none;
+        }
+
+        .modal-body {
+            background: #FFFFFF;
+            padding: 30px;
+            border-radius: 24px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            border: 5px solid var(--accent-color);
+            box-shadow: 0 12px 0 #00A88F;
+            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popUp {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .score-text {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin: 15px 0;
+        }
+
+        .feedback-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-color);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .btn-close-modal {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #00A88F;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 150;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="container">
+        <div class="header-teacher">Giáo viên tạo: Ms Lê Hằng English</div>
+        
+        <div class="notice-box">
+            <span class="notice-title">⚠️ LỜI NHẮC CỰC KỲ QUAN TRỌNG ⚠️</span>
+            Chỉ có đọc kỹ giải thích ngay sau mỗi câu, sau đó ghi lại từ vựng/cấu trúc mới vào vở để học thì mới thực sự giỏi lên.<br>
+            Làm cho xong mà không đọc giải thích hay đọc qua loa không ghi chép thì chỉ tốn thời gian vô ích!
+            <span class="notice-sub">* Kéo tới đâu, làm tới đó! *</span>
+        </div>
+
+        <div id="quiz-container"></div>
+
+        <div class="submit-container">
+            <button class="btn-submit-main" onclick="evaluateAll()">NỘP BÀI TỔNG KẾT</button>
+        </div>
+    </div>
+
+    <div class="modal-result" id="result-modal">
+        <div class="modal-body">
+            <h2 style="margin-top:0; color: var(--accent-color);">🎉 KẾT QUẢ BÀI LÀM 🎉</h2>
+            <div class="score-text" id="score-display">0/0</div>
+            <div class="feedback-text" id="feedback-display"></div>
+            <button class="btn-close-modal" onclick="closeModal()">Làm lại bài thi</button>
+        </div>
+    </div>
+
+    <script>
+        // WEB AUDIO API - Tự động tạo hiệu ứng âm thanh sống động không dùng link ngoài
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, duration) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+        function soundCorrect() {
+            playTone(523.25, 'sine', 0.15);
+            setTimeout(() => playTone(659.25, 'sine', 0.3), 100);
+        }
+        function soundWrong() {
+            playTone(180, 'sawtooth', 0.2);
+            setTimeout(() => playTone(130, 'sawtooth', 0.3), 150);
+        }
+
+        // DỮ LIỆU ĐỀ BÀI VÀ GIẢI THÍCH CHI TIẾT 30 CÂU TRẮC NGHIỆM
+        const quizData = [
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q1",
+                question: "1. People who are colour blind often can't ________ between red and green.",
+                options: ["see", "differ", "tell", "distinguish"],
+                answer: "distinguish",
+                translation: "Người mù màu thường không thể phân biệt giữa màu đỏ và màu xanh lá cây.",
+                analysis: "A. see (v): nhìn thấy.<br>B. differ (v): khác biệt.<br>C. tell (v): kể, phân biệt.<br>D. distinguish (v): phân biệt.",
+                justification: "Cấu trúc cố định 'distinguish between A and B' nghĩa là phân biệt giữa hai chủ thể A và B.",
+                distractor: "Mặc dù 'tell' cũng mang nghĩa phân biệt, nhưng để dùng đi kèm trực tiếp với 'between' thì 'distinguish' là sự lựa chọn tự nhiên và chính xác nhất."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q2",
+                question: "2. Our car broke down twice on the way to the wedding. ________ to say we arrived two hours late.",
+                options: ["Needless", "Pointless", "Regardless", "Worthless"],
+                answer: "Needless",
+                translation: "Xe của chúng tôi bị hỏng hai lần trên đường đến đám cưới. Không cần phải nói cũng biết/Tất nhiên là chúng tôi đã đến muộn hai tiếng.",
+                analysis: "A. Needless (adj): không cần thiết.<br>B. Pointless (adj): vô nghĩa.<br>C. Regardless (adv): bất chấp.<br>D. Worthless (adj): vô giá trị.",
+                justification: "Thành ngữ cố định đứng đầu câu 'Needless to say' mang nghĩa rõ ràng là 'Tất nhiên là / Không cần phải nói cũng biết'.",
+                distractor: "Các tính từ còn lại không bao giờ kết hợp tạo thành cụm từ cố định đi với cụm trạng ngữ 'to say' như phương án A."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q3",
+                question: "3. I hope the lecturer wasn't referring ________ my assignment when he made that remark.",
+                options: ["in", "for", "to", "of"],
+                answer: "to",
+                translation: "Tôi hy vọng vị giảng viên không ám chỉ đến bài tập của tôi khi ông ấy đưa ra lời nhận xét đó.",
+                analysis: "Các giới từ cơ bản: in / for / to / of.",
+                justification: "Động từ 'refer' luôn kết hợp với giới từ 'to' tạo thành cụm từ 'refer to something' nghĩa là ám chỉ, nói đến, nhắc đến cái gì.",
+                distractor: "Các giới từ khác hoàn toàn không đi với động từ refer để tạo ra tầng ý nghĩa tương quan này."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q4",
+                question: "4. Languages ________ over time so dictionaries need to be regularly updated.",
+                options: ["eliminate", "evolve", "establish", "elicit"],
+                answer: "evolve",
+                translation: "Ngôn ngữ tiến hóa theo thời gian nên từ điển cần phải được cập nhật thường xuyên.",
+                analysis: "A. eliminate (v): loại bỏ.<br>B. evolve (v): tiến hóa, tự phát triển dần dần.<br>C. establish (v): thiết lập.<br>D. elicit (v): khơi gợi.",
+                justification: "Ngôn ngữ thay đổi, tự điều chỉnh và phát triển theo tiến trình xã hội qua nhiều thế kỷ, hành động này được gọi là 'evolve' (tiến hóa).",
+                distractor: "Eliminate (hủy bỏ) hay establish (thiết lập) không phản ánh đúng bản chất tự nhiên, liên tục thay đổi của một hệ thống ngôn ngữ tự nhiên."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q5",
+                question: "5. My teacher said my essay was ________. She said she couldn't follow my argument.",
+                options: ["incompetent", "inaccurate", "incoherent", "incisive"],
+                answer: "incoherent",
+                translation: "Giáo viên nói bài văn của tôi bị rời rạc/thiếu mạch lạc. Cô ấy nói mình không thể theo kịp lập luận của tôi.",
+                analysis: "A. incompetent (adj): kém cỏi, bất tài.<br>B. inaccurate (adj): không chính xác.<br>C. incoherent (adj): rời rạc, không mạch lạc.<br>D. incisive (adj): sắc bén.",
+                justification: "Dựa vào mệnh đề dữ kiện 'couldn't follow my argument' (không thể theo kịp lập luận), tính từ chính xác để mô tả một văn bản lộn xộn, thiếu tính liên kết liên tục là 'incoherent'.",
+                distractor: "Inaccurate chỉ nói về lỗi sai dữ kiện số liệu; incompetent chỉ nói về năng lực nghiệp vụ yếu kém của con người."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q6",
+                question: "6. It's important to teach children not to ________ lies.",
+                options: ["say", "speak", "talk", "tell"],
+                answer: "tell",
+                translation: "Việc dạy trẻ con không được nói dối là rất quan trọng.",
+                analysis: "A. say (v): nói ra một câu cụ thể.<br>B. speak (v): nói một ngôn ngữ.<br>C. talk (v): trò chuyện qua lại.<br>D. tell (v): kể, bảo.",
+                justification: "Cụm từ cố định (Collocation) bắt buộc: 'tell lies' (nói dối) và trái nghĩa của nó là 'tell the truth' (nói thật).",
+                distractor: "Tuyệt đối không sử dụng các động từ say, speak hay talk đi chung với từ 'lies'."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q7",
+                question: "7. These figures ________ a peak in 1982 when over 2 million new machines were sold.",
+                options: ["got", "increased", "rose", "reached"],
+                answer: "reached",
+                translation: "Những số liệu này đã đạt đỉnh điểm vào năm 1982 khi có hơn 2 triệu máy mới được bán ra.",
+                options: ["got", "increased", "rose", "reached"],
+                analysis: "A. got (v): đạt được.<br>B. increased (v): tăng lên.<br>C. rose (v): tăng lên (nội động từ).<br>D. reached (v): đạt tới.",
+                justification: "Cụm thuật ngữ mô tả biểu đồ: 'reach a peak' mang nghĩa đạt tới đỉnh điểm, chạm ngưỡng cao nhất.",
+                distractor: "Rose hay increased là nội động từ, không đi trực tiếp với một tân ngữ có mạo từ 'a peak' như phương án D mà phải đi kèm giới từ (ví dụ: rose to a peak)."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q8",
+                question: "8. Air ________ is cheaper than other forms of long-distance transport in my country.",
+                options: ["trip", "journey", "travel", "travelling"],
+                answer: "travel",
+                translation: "Di chuyển bằng đường hàng không rẻ hơn các hình thức vận tải đường dài khác ở nước tôi.",
+                analysis: "A. trip (n): chuyến đi ngắn.<br>B. journey (n): hành trình dài.<br>C. travel (n): việc đi lại, ngành du lịch (danh từ không đếm được).<br>D. travelling (gerund): việc đi du lịch.",
+                justification: "Cụm danh từ ghép không đếm được 'Air travel' chỉ chung phương thức di chuyển bằng đường hàng không.",
+                distractor: "Trip và journey là các danh từ đếm được, luôn cần mạo từ (a/the) đứng trước và chỉ một chuyến đi cụ thể chứ không dùng chỉ một loại hình giao thông nói chung."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q9",
+                question: "9. A large number of houses were ________ by the storm.",
+                options: ["affected", "effected", "influenced", "involved"],
+                answer: "affected",
+                translation: "Một số lượng lớn ngôi nhà đã bị ảnh hưởng nặng nề bởi cơn bão.",
+                analysis: "A. affected (v): làm ảnh hưởng, tác động tiêu cực.<br>B. effected (v): làm cho xảy ra.<br>C. influenced (v): bị ảnh hưởng (suy nghĩ/hành vi).<br>D. involved (v): liên quan đến.",
+                justification: "Động từ 'affect' diễn tả sự tác động vật lý, gây tổn thất, thiệt hại của thiên tai tác động trực tiếp lên đồ vật, nhà cửa.",
+                distractor: "Effect chủ yếu đóng vai trò danh từ. Ngôi nhà là vật thể vô tri vô giác nên dùng 'influenced' (ảnh hưởng tâm lý, thói quen) là sai ngữ cảnh."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q10",
+                question: "10. Many people believe that violent computer games can have a harmful ________ on children.",
+                options: ["affect", "effect", "damage", "involvement"],
+                answer: "effect",
+                translation: "Nhiều người tin rằng các trò chơi máy tính bạo lực có thể gây ra tác động có hại đối với trẻ em.",
+                analysis: "A. affect (v): làm ảnh hưởng.<br>B. effect (n): sự ảnh hưởng, tác động.<br>C. damage (n): sự thiệt hại vật chất.<br>D. involvement (n): sự dính líu.",
+                justification: "Cấu trúc kinh điển: 'have a/an + adj + effect on somebody/something'. Đứng sau tính từ 'harmful' bắt buộc phải điền một danh từ.",
+                distractor: "Tránh nhầm lẫn nghiêm trọng giữa động từ Affect (bắt đầu bằng chữ A) và danh từ Effect (bắt đầu bằng chữ E)."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q11",
+                question: "11. The price of fresh fruit and vegetables ________ considerably throughout the whole year.",
+                options: ["rises", "peaks", "fluctuates", "decreases"],
+                answer: "fluctuates",
+                translation: "Giá cả của trái cây và rau củ tươi biến động đáng kể trong suốt cả năm.",
+                analysis: "A. rises (v): tăng lên.<br>B. peaks (v): đạt đỉnh.<br>C. fluctuates (v): dao động, biến động liên tục.<br>D. decreases (v): giảm xuống.",
+                justification: "Trạng từ 'considerably' kết hợp với trạng ngữ 'throughout the whole year' (suốt cả năm lúc tăng lúc giảm tùy thời điểm mùa vụ) thể hiện sự trồi sụt liên tục -> 'fluctuates'.",
+                distractor: "Rises và decreases chỉ xu hướng một chiều tĩnh, không lột tả được bức tranh thay đổi liên tục lên xuống của nông sản."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q12",
+                question: "12. The population of wild birds peaked approximately ________ 400,000 before falling rapidly.",
+                options: ["at", "for", "in", "of"],
+                answer: "at",
+                translation: "Quần thể chim hoang dã đã đạt đỉnh ở mức xấp xỉ 400.000 con trước khi sụt giảm nhanh chóng.",
+                analysis: "Các giới từ cơ bản: at / for / in / of.",
+                justification: "Cấu trúc động từ số liệu biểu đồ: 'peak at + số lượng/mốc cụ thể' nghĩa là đạt đỉnh tại một cột mốc số liệu.",
+                distractor: "Các giới từ khác không nằm trong cấu trúc đi liền sau động từ peak để dẫn dắt một con số thống kê."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q13",
+                question: "13. My first job was to arrange the files into ________ order from the oldest to the most recent.",
+                options: ["alphabetical", "chronological", "numerical", "historical"],
+                answer: "chronological",
+                translation: "Công việc đầu tiên của tôi là sắp xếp các tệp hồ sơ theo thứ tự thời gian từ cũ nhất đến gần đây nhất.",
+                analysis: "A. alphabetical (adj): theo bảng chữ cái ABC.<br>B. chronological (adj): theo trình tự dòng thời gian.<br>C. numerical (adj): theo số thứ tự.<br>D. historical (adj): thuộc về lịch sử.",
+                justification: "Cụm dữ kiện định hướng rõ ràng 'from the oldest to the most recent' (từ lâu đời nhất đến gần đây nhất) chỉ ra trật tự sắp xếp bắt buộc phải tuân theo mốc thời gian -> 'chronological order'.",
+                distractor: "Alphabetical sắp theo chữ cái đầu, numerical sắp theo mã số đếm, không mâu thuẫn liên quan trực tiếp đến mốc cũ/mới của tài liệu."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q14",
+                question: "14. The train whistle warned us of its ________ departure.",
+                options: ["previous", "imminent", "subsequent", "former"],
+                answer: "imminent",
+                translation: "Tiếng còi tàu đã cảnh báo chúng tôi về sự khởi hành sắp xảy ra đến nơi của nó.",
+                analysis: "A. previous (adj): trước đó.<br>B. imminent (adj): sắp sửa xảy ra đến nơi cận kề.<br>C. subsequent (adj): xảy ra sau đó.<br>D. former (adj): cựu, trước đây.",
+                justification: "Tiếng còi tàu hú lên mang tính chất báo động khẩn cấp cho hành khách biết sự việc khởi hành sắp diễn ra trong tích tắc ngắn ngủi, từ đặc thù là 'imminent'.",
+                distractor: "Subsequent (sau) hay previous (trước) mang tính chất liệt kê trật tự sự kiện bình thường, không chứa sắc thái khẩn cấp cận kề như imminent."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q15",
+                question: "15. The majority of cave art was created in prehistoric ________",
+                options: ["time", "stage", "era", "times"],
+                answer: "times",
+                translation: "Phần lớn nghệ thuật hang động được tạo ra vào thời tiền sử.",
+                analysis: "A. time (n): thời gian.<br>B. stage (n): giai đoạn.<br>C. era (n): kỷ nguyên.<br>D. times (n số nhiều): thời đại.",
+                justification: "Cụm danh từ cố định dùng để gọi tên các thời kỳ lịch sử lớn trong quá khứ xa xưa: 'in prehistoric times' (vào thời tiền sử) tương tự như 'in ancient times'.",
+                distractor: "Từ 'era' cũng có nghĩa là kỷ nguyên nhưng bắt buộc ngữ pháp phải đi kèm mạo từ xác định đứng trước, ví dụ: 'in *the* prehistoric era'."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q16",
+                question: "16. Computer viruses are a modern-________ problem.",
+                options: ["day", "era", "times", "time"],
+                answer: "day",
+                translation: "Vi-rút máy tính là một vấn đề của thời đại ngày nay.",
+                analysis: "Các phương án kết hợp từ tạo từ ghép.",
+                justification: "Tính từ ghép có dấu gạch nối cố định bắt buộc đứng trước danh từ: 'modern-day + N' mang ý nghĩa biểu đạt tính chất thuộc về thời nay, thời hiện đại.",
+                distractor: "Các danh từ khác không có cấu trúc kết hợp qua dấu gạch nối với từ 'modern-' để tạo ra một tính từ ghép hợp lệ."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q17",
+                question: "17. I much prefer life in the twenty-first ________ to that of the Middle Ages.",
+                options: ["age", "era", "years", "century"],
+                answer: "century",
+                translation: "Tôi thích cuộc sống ở thế kỷ hai mươi mốt hơn nhiều so với cuộc sống ở thời Trung Cổ.",
+                analysis: "A. age (n): thời đại.<br>B. era (n): kỷ nguyên.<br>C. years (n): các năm.<br>D. century (n): thế kỷ.",
+                justification: "Khi đi liền sau số thứ tự chỉ định cụ thể thế kỷ (ở đây là 21st), danh từ bắt buộc phải dùng là 'century' -> 'the twenty-first century'.",
+                distractor: "Muốn dùng 'age', cấu trúc thông thường phải mang tính chất đặc trưng không dùng số thứ tự trực tiếp, ví dụ: 'the digital age' (thời đại kỹ thuật số)."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q18",
+                question: "18. It can take ________ time for people to get used to a new system.",
+                options: ["long", "a long", "so long", "too long"],
+                answer: "a long",
+                translation: "Có thể mất một khoảng thời gian dài để mọi người làm quen với một hệ thống mới.",
+                analysis: "Cấu trúc định lượng từ đi với thời gian.",
+                justification: "Cấu trúc thành ngữ cực kỳ quen thuộc với động từ mang tính tiêu tốn: 'It takes/can take + a long time + to do something' (Mất nhiều thời gian để làm gì).",
+                distractor: "Nếu thiếu mạo từ 'a' như phương án A câu sẽ hoàn toàn bị sai ngữ pháp cấu trúc danh từ đếm được số ít biểu thị một quãng thời gian."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q19",
+                question: "19. Many people are fascinated by the native ________ of Australia, especially koalas and kangaroos.",
+                options: ["fauna", "flora", "agriculture", "vegetation"],
+                answer: "fauna",
+                translation: "Nhiều người bị mê hoặc bởi hệ động vật bản địa của Úc, đặc biệt là gấu túi koala và chuột túi kangaroo.",
+                analysis: "A. fauna (n): hệ động vật.<br>B. flora (n): hệ thực vật.<br>C. agriculture (n): nền nông nghiệp.<br>D. vegetation (n): thảm thực vật.",
+                justification: "Dữ kiện 'koalas and kangaroos' là các loài động vật cụ thể, do đó danh từ mang nghĩa bao quát tương thích nhất phải là 'fauna' (hệ động vật).",
+                distractor: "Flora và vegetation chỉ tập hợp cây cỏ thực vật, hoàn toàn không liên quan đến gấu túi và chuột túi."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q20",
+                question: "20. The mother bird carries food back to the nest in its ________",
+                options: ["feather", "wing", "beak", "paw"],
+                answer: "beak",
+                translation: "Chim mẹ ngậm thức ăn mang về tổ bằng chiếc mỏ của nó.",
+                analysis: "A. feather (n): lông vũ.<br>B. wing (n): cánh chim.<br>C. beak (n): mỏ chim cứng.<br>D. paw (n): chân thú có vuốt móng.",
+                justification: "Loài chim thực hiện việc ngậm giữ, kẹp chặt và di chuyển thức ăn bằng bộ phận mỏ, thuật ngữ tiếng Anh chính xác là 'beak'.",
+                distractor: "Wing hỗ trợ bay, feather làm chức năng giữ ấm cơ thể, tuyệt đối không có khả năng cầm nắm giữ thức ăn thô."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q21",
+                question: "21. We must try to protect affected. animals, otherwise when a species disappears the whole ecosystem is ________",
+                options: ["ecological", "endangered", "extinct", "exotic"],
+                answer: "endangered",
+                translation: "Chúng ta phải cố gắng bảo vệ các loài động vật đang bị đe dọa nguy cấp, nếu không khi một loài biến mất, toàn bộ hệ sinh thái sẽ bị ảnh hưởng.",
+                analysis: "A. ecological (adj): thuộc hệ sinh thái.<br>B. endangered (adj): có nguy cơ tuyệt chủng cao.<br>C. extinct (adj): đã tuyệt chủng.<br>D. exotic (adj): kỳ lạ, ngoại lai.",
+                justification: "Đối tượng cần được con người hành động bảo vệ (protect) phải là những động vật sắp sửa biến mất nhưng hiện tại vẫn đang tồn tại -> 'endangered animals'.",
+                distractor: "Nếu chọn 'extinct' (đã tuyệt chủng hoàn toàn) thì thực tế không thể tiến hành hành động cứu vớt hay bảo tồn được nữa."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q22",
+                question: "22. I believe that farmers should be banned from using ________ near waterways.",
+                options: ["crops", "contamination", "pollution", "pesticides"],
+                answer: "pesticides",
+                translation: "Tôi tin rằng nông dân nên bị cấm sử dụng thuốc trừ sâu gần các tuyến đường thủy.",
+                analysis: "A. crops (n): mùa màng.<br>B. contamination (n): sự làm nhiễm độc.<br>C. pollution (n): sự ô nhiễm.<br>D. pesticides (n): thuốc trừ sâu hóa học.",
+                justification: "Hóa chất nông nghiệp độc hại nhân tạo mà người nông dân thường phun tưới có khả năng gây ô nhiễm mạch nước ngầm nghiêm trọng là 'pesticides'.",
+                distractor: "Crops là cây trồng thì không lý do gì bị cấm sử dụng. Pollution và contamination là danh từ chỉ kết quả hiện trạng, không thể dùng làm tân ngữ hành động sau từ 'using'."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q23",
+                question: "23. Zoos should try to re-create the animals' ________ habitat rather than keeping them in cages.",
+                options: ["nature", "native", "natural", "naturalist"],
+                answer: "natural",
+                translation: "Sở thú nên cố gắng tái tạo môi trường sống tự nhiên của động vật thay vì nhốt chúng trong chuồng.",
+                analysis: "A. nature (n): tự nhiên.<br>B. native (adj): bản xứ.<br>C. natural (adj): thuộc về thiên nhiên.<br>D. naturalist (n): nhà tự nhiên học.",
+                justification: "Cụm danh từ thuật ngữ môi trường cực kỳ phổ biến: 'natural habitat' nghĩa là môi trường sống tự nhiên vốn có của sinh vật.",
+                distractor: "Nature là danh từ không đóng vai trò tính ngữ bổ nghĩa đứng trước danh từ habitat trực tiếp theo cấu trúc ngữ pháp này."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q24",
+                question: "24. A plant is only as healthy as the ________ it grows in.",
+                options: ["habitat", "water", "soil", "vegetation"],
+                answer: "soil",
+                translation: "Một cái cây chỉ khỏe mạnh tương ứng với vùng đất trồng mà nó lớn lên trong đó.",
+                analysis: "A. habitat (n): môi trường sống tổng thể.<br>B. water (n): nước.<br>C. soil (n): đất trồng, thổ nhưỡng.<br>D. vegetation (n): thảm thực vật.",
+                justification: "Cây cối sinh trưởng cắm rễ sâu hút dưỡng chất từ lòng đất, giới từ 'in' ở mệnh đề 'grows in' hướng trực tiếp đến giá thể đặc là đất trồng (`soil`).",
+                distractor: "Habitat mang nghĩa quá rộng bao trùm cả vùng khí hậu lớn, cây cối không thể đâm rễ trực tiếp xuyên qua một bầu không gian trừu tượng."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q25",
+                question: "25. It must have been amazing to be the first astronauts ________ space.",
+                options: ["in", "of", "up", "to"],
+                answer: "in",
+                translation: "Chắc hẳn đã rất tuyệt vời khi trở thành những phi hành gia đầu tiên ở ngoài không gian.",
+                analysis: "Các giới từ cơ bản định vị không gian.",
+                justification: "Cụm cụm giới từ chỉ vị trí không gian vũ trụ cố định: `in space` (ở ngoài không gian).",
+                distractor: "Các giới từ khác hoàn toàn không tạo thành kết cấu trạng ngữ chỉ vị trí đúng ngữ pháp với danh từ space."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q26",
+                question: "26. I think we should spend more money taking care of our own ________",
+                options: ["Earth", "atmosphere", "planet", "stars"],
+                answer: "planet",
+                translation: "Tôi nghĩ chúng ta nên chi nhiều tiền hơn để chăm sóc hành tinh của chính chúng ta.",
+                analysis: "A. Earth (n): Trái Đất.<br>B. atmosphere (n): bầu khí quyển.<br>C. planet (n): hành tinh.<br>D. stars (n): các ngôi sao.",
+                justification: "Khẩu hiệu kêu gọi ý thức bảo vệ môi trường toàn cầu phổ biến trong văn phong học thuật là cụm từ 'our own planet' (hành tinh của chúng ta).",
+                distractor: "Tránh chọn danh từ riêng Earth vì khi có cấu trúc sở hữu nhấn mạnh 'our own' đứng trước, danh từ chung planet nghe tự nhiên và đúng văn phong hơn."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q27",
+                question: "27. I think we should spend more on space ________",
+                options: ["explore", "explorer", "expansion", "exploration"],
+                answer: "exploration",
+                translation: "Tôi nghĩ chúng ta nên chi tiêu nhiều hơn cho việc khám phá không gian.",
+                analysis: "A. explore (v): khám phá.<br>B. explorer (n): nhà thám hiểm.<br>C. expansion (n): sự mở rộng.<br>D. exploration (n): sự thám hiểm, thăm dò hành tinh.",
+                justification: "Đứng sau danh từ bổ nghĩa 'space' cần một danh từ chỉ hành động để tạo lập cụm danh từ ghép hoàn chỉnh: 'space exploration' (sự thám hiểm không gian).",
+                distractor: "Explore là động từ nên loại. Explorer chỉ danh từ chỉ người thám hiểm, không tương thích nghĩa với hành vi đầu tư dòng tiền tài chính."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q28",
+                question: "28. Navigation around the globe is a lot simpler thanks to the information we receive from ________",
+                options: ["satellites", "stations", "systems", "shuttles"],
+                answer: "satellites",
+                translation: "Việc định vị xung quanh quả địa cầu trở nên đơn giản hơn rất nhiều nhờ thông tin chúng ta nhận được từ các vệ tinh.",
+                analysis: "A. satellites (n): vệ tinh nhân tạo.<br>B. stations (n): trạm mặt đất.<br>C. systems (n): hệ thống.<br>D. shuttles (n): tàu vũ trụ con thoi.",
+                justification: "Hệ thống bản đồ định vị GPS toàn cầu hoạt động phụ thuộc trực tiếp vào mạng lưới các vệ tinh nhân tạo quay xung quanh bầu khí quyển liên tục truyền dữ liệu.",
+                distractor: "Shuttles chỉ phương tiện di chuyển qua lại giữa trái đất và không gian, không mang chức năng phát sóng định vị liên tục cho thiết bị di động."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q29",
+                question: "29. I don't think we will ever find another planet that can ________ life.",
+                options: ["suspend", "survive", "supply", "sustain"],
+                answer: "sustain",
+                translation: "Tôi không nghĩ chúng ta sẽ tìm thấy một hành tinh nào khác có thể duy trì sự sống.",
+                analysis: "A. suspend (v): đình chỉ.<br>B. survive (v): sống sót (nội động từ).<br>C. supply (v): cung cấp nguồn cung.<br>D. sustain (v): chống đỡ, chống chịu, duy trì lâu dài.",
+                justification: "Cụm thuật ngữ khoa học cố định: `sustain life` mang nghĩa cung cấp điều kiện môi trường lý tưởng để duy trì sự sống phát triển bền vững.",
+                distractor: "Survive mang nghĩa tự mình sống sót vượt qua nghịch cảnh, không thể dùng làm ngoại động từ mang nghĩa hành tinh nuôi dưỡng sự sống được."
+            },
+            {
+                section: "30 Vocabulary & Grammar Practice Questions",
+                id: "q30",
+                question: "30. I imagine astronauts spend a lot of time thinking about life ________ Earth.",
+                options: ["in", "of", "down", "on"],
+                answer: "on",
+                translation: "Tôi tưởng tượng các phi hành gia dành nhiều thời gian suy nghĩ về cuộc sống trên Trái Đất.",
+                analysis: "Các giới từ định vị vị trí địa lý bề mặt.",
+                justification: "Thành ngữ chỉ vị trí không gian sống quen thuộc: `on Earth` (trên mặt đất, trên Trái Đất).",
+                distractor: "Các giới từ khác như in, of hay down không tạo thành một cụm ngữ nghĩa đúng chuẩn mực ngữ pháp khi đi liền với danh từ Earth chỉ hành tinh."
+            }
+        ];
+
+        // Thuật toán Shuffle xáo trộn ngẫu nhiên mảng đáp án để học sinh không học vẹt
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // RENDER GIAO DIỆN CÂU HỎI TỰ ĐỘNG
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            let currentSection = "";
+
+            quizData.forEach((q, index) => {
+                if (q.section !== currentSection) {
+                    currentSection = q.section;
+                    const secTitle = document.createElement('div');
+                    secTitle.className = 'section-title';
+                    secTitle.innerHTML = currentSection;
+                    container.appendChild(secTitle);
+                }
+
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `card_${q.id}`;
+
+                const qText = document.createElement('div');
+                qText.className = 'question-text';
+                qText.innerHTML = `<b>Câu ${index + 1}:</b> ${q.question}`;
+                card.appendChild(qText);
+
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+
+                const shuffledOpts = shuffleArray([...q.options]);
+                shuffledOpts.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkABCDAnswer(btn, opt, q.answer, q.id);
+                    grid.appendChild(btn);
+                });
+                card.appendChild(grid);
+
+                const expBox = document.createElement('div');
+                expBox.className = 'explanation-box';
+                expBox.id = `exp_${q.id}`;
+                expBox.innerHTML = `
+                    <div class="exp-title">🌟 GIẢI THÍCH CHI TIẾT TỪ MS LÊ HẰNG:</div>
+                    <div class="exp-section"><span class="exp-highlight">1. Dịch nghĩa câu:</span> ${q.translation}</div>
+                    <div class="exp-section"><span class="exp-highlight">2. Từ vựng các phương án:</span><br>${q.analysis}</div>
+                    <div class="exp-section"><span class="exp-highlight">3. Vì sao đáp án này đúng?</span> ${q.justification}</div>
+                    <div class="exp-section"><span class="exp-highlight">4. Phân tích bẫy / Các câu khác sai vì sao?</span> ${q.distractor}</div>
+                `;
+                card.appendChild(expBox);
+                container.appendChild(card);
+            });
+        }
+
+        // XỬ LÝ LOGIC CHẤM ĐIỂM TRẮC NGHIỆM ABCD TỨC THÌ
+        function checkABCDAnswer(selectedBtn, chosenOpt, correctOpt, qId) {
+            const card = document.getElementById(`card_${qId}`);
+            const buttons = card.querySelectorAll('.option-btn');
+            
+            buttons.forEach(b => b.classList.add('disabled'));
+
+            if (chosenOpt === correctOpt) {
+                selectedBtn.classList.add('correct');
+                soundCorrect();
+                triggerConfettiEffect();
+            } else {
+                selectedBtn.classList.add('wrong');
+                soundWrong();
+                buttons.forEach(b => {
+                    if (b.innerText === correctOpt) b.classList.add('correct');
+                });
+            }
+
+            const exp = document.getElementById(`exp_${qId}`);
+            if (exp) exp.style.display = 'block';
+        }
+
+        // HIỆU ỨNG PHÁO GIẤY CONFETTI KHI CHỌN ĐÚNG (CONFETTI ENGINE NATIVE)
+        const canvasEl = document.getElementById('confetti-canvas');
+        const ctxCanvas = canvasEl.getContext('2d');
+        let particles = [];
+        function resizeCanvas() {
+            canvasEl.width = window.innerWidth;
+            canvasEl.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function triggerConfettiEffect() {
+            for (let i = 0; i < 40; i++) {
+                particles.push({
+                    x: window.innerWidth / 2 + (Math.random() - 0.5) * 200,
+                    y: window.innerHeight / 2 + (Math.random() - 0.5) * 200,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.8) * 12,
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                    size: Math.random() * 8 + 4,
+                    alpha: 1
+                });
+            }
+        }
+
+        function updateConfetti() {
+            ctxCanvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2;
+                p.alpha -= 0.015;
+                if (p.alpha <= 0) {
+                    particles.splice(idx, 1);
+                } else {
+                    ctxCanvas.fillStyle = p.color;
+                    ctxCanvas.globalAlpha = p.alpha;
+                    ctxCanvas.beginPath();
+                    ctxCanvas.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctxCanvas.fill();
+                }
+            });
+            ctxCanvas.globalAlpha = 1;
+            requestAnimationFrame(updateConfetti);
+        }
+        requestAnimationFrame(updateConfetti);
+
+        // LOGIC TÍNH TỔNG ĐIỂM
+        function evaluateAll() {
+            let totalQuestions = quizData.length;
+            let correctCount = 0;
+
+            quizData.forEach(q => {
+                const card = document.getElementById(`card_${q.id}`);
+                const correctBtn = Array.from(card.querySelectorAll('.option-btn')).find(b => b.innerText === q.answer);
+                if (correctBtn && correctBtn.classList.contains('correct')) {
+                    correctCount++;
+                }
+            });
+
+            const percentage = (correctCount / totalQuestions) * 100;
+            let feedback = "";
+
+            if (percentage < 50) {
+                feedback = "Điểm lần này chưa cao lắm, con cố gắng đọc kỹ giải thích đáp án và làm lại nha. Cô tin con sẽ làm tốt hơn ở lần sau!";
+            } else if (percentage >= 50 && percentage <= 80) {
+                feedback = "Con đã có tiến bộ khá ổn rồi, con cố gắng đọc kỹ giải thích đáp án và làm lại nha. Cô tin con sẽ làm tốt hơn ở lần sau!";
+            } else {
+                feedback = "Làm tốt lắm, con cố gắng ring điểm 10 ở lần sau nha!";
+            }
+
+            document.getElementById('score-display').innerText = `${correctCount} / ${totalQuestions}`;
+            document.getElementById('feedback-display').innerText = feedback;
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').style.display = 'none';
+            location.reload();
+        }
+
+        window.onload = function() {
+            renderQuiz();
+        };
+    </script>
+</body>
+</html>
